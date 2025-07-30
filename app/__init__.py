@@ -17,6 +17,6 @@ def create_app():
     with app.app_context():
         db.create_all()
         from app import routes  # Importa aquí para registrar las rutas
-        print("Aplicación creada y base de datos inicializada")
+
     return app
 

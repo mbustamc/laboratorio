@@ -23,23 +23,38 @@
       right: 30px;
       z-index: 1000;
     }
+    #ver-carrito {
+      position: fixed;
+      top: 20px;
+      right: 200px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
   <div id="carrito-indicador" class="alert alert-info py-2 px-3">
-    Carrito: <span id="carrito-cantidad">0</span> productos
+    <button class="btn btn-success">Carrito: <span id="carrito-cantidad">0</span></button>
   </div>
+<div id="ver-carrito" class="alert alert-info py-2 px-3">
+  <button id="ver-carrito-btn" class="btn btn-success"><span>Ver carrito</span></button>
+</div>
+
   <div class="container">
-    <h1 class="my-4">Nuestros productos:</h1>
+    <h1 class="my-4">Panaderia La Nube:</h1>
+    <h2 class="my-4">Nuestros productos:</h2>
     <div id="contenedor" class="row">
       <!-- Los datos se cargarán aquí -->
     </div>
-    <div class="text-end my-4">
-    <button id="ver-carrito" class="btn btn-success">Ver carrito</button>
-  </div>
   </div>
 
- <script>
+  <div class="container">
+    <div class="alert alert-info py-2 px-3 d-flex gap-3">
+      <button id="ver-pedidos" class="btn btn-success"><span>Ver pedidos</span></button>
+      <button id="crear-producto" class="btn btn-success"><span>Crear producto</span></button>
+    </div>
+  </div>
+
+  <script>
     // El carrito ahora es un array de objetos: {id, nombre, precio, foto, cantidad}
     const carrito = [];
 
@@ -61,6 +76,7 @@
       try {
         const respuesta = await fetch('/api/productos');
         const datos = await respuesta.json();
+        console.log(datos);
 
         contenedor.innerHTML = "";
         datos.forEach((item, index) => {
@@ -76,6 +92,7 @@
               <div class="card-body d-flex flex-column">
                 <h5 class="card-title">${nombre}</h5>
                 <p class="card-text">${precio}</p>
+                <a href="/productos/${item.id}" class="btn btn-outline-info mb-2">Ver detalle</a>
                 <button class="btn btn-primary mt-auto agregar-btn">Agregar</button>
               </div>
             </div>
@@ -103,26 +120,31 @@
         contenedor.innerHTML = "<div class='alert alert-danger'>Error al cargar los datos.</div>";
         console.error(error);
       }
+    };
+
+  document.getElementById('ver-carrito-btn').addEventListener('click', () => {
+    if (carrito.length > 0) {
+      fetch('/carrito', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(carrito)
+      }).then(() => {
+        window.location.href = '/carrito';
+      });
+    } else {
+      alert("El carrito está vacío.");
     }
+  });
 
-    document.getElementById('ver-carrito').addEventListener('click', () => {
-      if (carrito.length > 0) {
-        fetch('/carrito', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(carrito)
-        }).then(() => {
-          window.location.href = '/carrito';
-        });
-      } else {
-        alert("El carrito está vacío.");
-      }
-    });
+document.getElementById('ver-pedidos').addEventListener('click', () => {
+  window.location.href = '/pedidos';
+});
 
+document.getElementById('crear-producto').addEventListener('click', () => {
+  window.location.href = '/crear_producto';
+});
     cargarDatos();
     actualizarCarrito();
   </script>
-</body>
-</html>

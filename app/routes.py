@@ -7,6 +7,20 @@ from app.models import Producto, Pedido, PedidoProductos
 def home():
     return render_template("index.html")
 
+@app.route("/productos/<int:id>")
+def mostrar_producto(id):
+    return render_template("productos.html", producto_id=id)
+
+@app.route("/pedidos")
+def mostrar_pedidos():
+    return render_template("pedidos.html")
+
+
+@app.route("/crear_producto")
+def crear_producto():
+    return render_template("crear_producto.html")
+
+
 @app.route("/carrito", methods=["GET", "POST"])
 def carrito():
     if request.method == "POST":
@@ -15,14 +29,7 @@ def carrito():
     productos = session.get("carrito", [])
     return render_template("carrito.html", productos=productos)
 
-@app.route("/productos/<int:id>")
-def mostrar_producto(id):
-    return render_template("producto.html", producto_id=id)
 
-@app.route("/pedidos")
-def mostrar_pedidos():
-    pedidos = Pedido.query.all()
-    return render_template("pedidos.html", pedidos=pedidos)
 
 # API para ver todos los productos
 @app.route("/api/productos", methods=["GET"])
@@ -34,6 +41,7 @@ def ver_productos():
         "precio": p.precio,
         "descripcion": p.descripcion
     } for p in productos])
+
 
 # API para obtener un producto por ID
 @app.route("/api/productos/<int:id>", methods=["GET"])
@@ -49,30 +57,7 @@ def obtener_producto(id):
     else:
         return jsonify({"mensaje": "Producto no encontrado"}), 404
 
-# API para procesar pedido
-@app.route("/api/procesar_pedido", methods=["POST"])
-def procesar_pedido():
-    pedido_data = request.get_json()
-    carrito = session.get("carrito", [])
-    if carrito:
-        nuevo_pedido = Pedido(cliente="Cliente temporal", fecha="2025-07-12")
-        db.session.add(nuevo_pedido)
-        db.session.commit()  # Para obtener el id del pedido
 
-        for item in carrito:
-            producto = Producto.query.get(item["id"])
-            if producto:
-                pedido_producto = PedidoProductos(
-                    pedido=nuevo_pedido,
-                    producto=producto,
-                    cantidad=item["cantidad"]
-                )
-                db.session.add(pedido_producto)
-        db.session.commit()
-        session["ultimo_pedido"] = pedido_data
-        return jsonify({"status": "ok", "mensaje": "Pedido procesado correctamente"})
-    else:
-        return jsonify({"status": "error", "mensaje": "Carrito vacío"}), 400
 
 # API para ver todos los pedidos
 @app.route("/api/pedidos", methods=["GET"])
@@ -94,3 +79,53 @@ def obtener_pedidos():
             ]
         }
     return jsonify([pedido_to_dict(p) for p in pedidos])
+
+
+# API para procesar pedido
+@app.route("/api/procesar_pedido", methods=["POST"])
+def procesar_pedido():
+    data = request.get_json()
+    nombre = data.get("nombre", "Cliente temporal")
+    productos = data.get("productos", [])
+    if productos:
+        nuevo_pedido = Pedido(cliente=nombre, fecha="2025-07-12")
+        db.session.add(nuevo_pedido)
+        db.session.commit()  # Para obtener el id del pedido
+
+        for item in productos:
+            producto = Producto.query.get(item["id"])
+            if producto:
+                pedido_producto = PedidoProductos(
+                    pedido=nuevo_pedido,
+                    producto=producto,
+                    cantidad=item["cantidad"]
+                )
+                db.session.add(pedido_producto)
+        db.session.commit()
+        return jsonify({"status": "ok", "mensaje": "Pedido procesado correctamente"})
+    else:
+        return jsonify({"status": "error", "mensaje": "Carrito vacío"}), 400
+    
+
+
+
+
+
+@app.route("/api/crear_producto", methods=["POST"])
+def crear_prod():
+    if request.is_json:
+        data = request.get_json()
+        nombre = data.get("nombre")
+        precio = data.get("precio")
+        descripcion = data.get("descripcion")
+        if not nombre or precio is None:
+            return jsonify({"mensaje": "Nombre y precio son obligatorios"}), 400
+        nuevo_producto = Producto(
+            nombre=nombre,
+            precio=precio,
+            descripcion=descripcion
+        )
+        db.session.add(nuevo_producto)
+    db.session.commit()
+
+    return jsonify({"mensaje": "Producto agregado", "id": nuevo_producto.id}), 201

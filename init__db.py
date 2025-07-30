@@ -3,7 +3,11 @@ from app import create_app, db
 
 app = create_app()
 
+with app.app_context():
+    db.create_all()
+    print("Tablas creadas correctamente.")
 
+    
 from app.models import Producto, Pedido, PedidoProductos
 
 with app.app_context():
