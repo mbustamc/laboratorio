@@ -3,12 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from config import Config
 import os
 
-
+'''
 from google.cloud.sql.connector import Connector
 import pg8000
 import sqlalchemy
 
-# Crea el conector
+#Crea el conector
 connector = Connector()
 
 def getconn():
@@ -28,19 +28,22 @@ engine = sqlalchemy.create_engine(
     pool_pre_ping=True
 )
 
-
+'''
 
 db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_ENGINE'] = engine
+    
     app.config.from_object(Config)
+    '''
+    app.config['SQLALCHEMY_ENGINE'] = engine
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "creator": getconn
     }
+    
     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql+pg8000://"
-
+    '''
     db.init_app(app)
 
     with app.app_context():
