@@ -31,7 +31,7 @@
     async function cargarProducto() {
       const contenedor = document.getElementById('producto-detalle');
       try {
-        const resp = await fetch(`/productos/${id}`);
+        const resp = await fetch(`/api/productos/${id}`);
         if (resp.ok) {
           const producto = await resp.json();
           const imgSrc = producto.foto ? producto.foto : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='400' height='400' fill='%23eeeeee'/></svg>";
