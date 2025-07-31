@@ -35,6 +35,10 @@ def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_ENGINE'] = engine
     app.config.from_object(Config)
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "creator": getconn
+    }
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql+pg8000://"
 
     db.init_app(app)
 
