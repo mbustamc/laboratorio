@@ -2,3 +2,4 @@ flask
 flask_sqlalchemy
 psycopg2-binary
 flask-cors
+cloud-sql-python-connector[pg8000]
