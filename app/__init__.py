@@ -3,6 +3,29 @@ from flask_sqlalchemy import SQLAlchemy
 from config import Config
 
 
+from google.cloud.sql.connector import Connector
+import pg8000
+import sqlalchemy
+
+# Crea el conector
+connector = Connector()
+
+def getconn():
+    conn = connector.connect(
+        "PROJECT_ID:REGION:INSTANCE_NAME",  # ← reemplázalo
+        "pg8000",
+        user="postgres",
+        password=os.environ["DB_PASSWORD"],  # ← viene desde tus credentials
+        db="DATABASE_NAME"                   # ← reemplázalo
+    )
+    return conn
+
+# Crea el engine de SQLAlchemy
+engine = sqlalchemy.create_engine(
+    "postgresql+pg8000://",
+    creator=getconn,
+    pool_pre_ping=True
+)
 
 
 
