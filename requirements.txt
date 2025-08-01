@@ -1,5 +1,6 @@
-flask
-flask_sqlalchemy
+Flask
+Flask-SQLAlchemy
 psycopg2-binary
-flask-cors
-#cloud-sql-python-connector[pg8000]
+google-cloud-sql-connector
+pg8000
+python-dotenv

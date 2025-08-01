@@ -9,7 +9,7 @@ services:
       - .:/app
     environment:
       - FLASK_ENV="development"
-      - DATABASE_URL"=postgresql://usuario:secret_pass@db:5432/panaderia"
+      - DATABASE_URL="postgresql://postgres:$up3rS3cr3t@db:5432/panaderia"
     depends_on:
       - db
  
@@ -19,8 +19,8 @@ services:
     image: postgres:14
     restart: always
     environment:
-      - POSTGRES_USER="usuario"
-      - POSTGRES_PASSWORD="secret_pass"
+      - POSTGRES_USER="postgres"
+      - POSTGRES_PASSWORD="$up3rS3cr3t"
       - POSTGRES_DB="panaderia"
     volumes:
       - pgdata:/var/lib/postgresql/data

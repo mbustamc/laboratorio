@@ -1,54 +1,47 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config import Config
-import os
-
-'''
 from google.cloud.sql.connector import Connector
 import pg8000
 import sqlalchemy
+from .config import Config
 
-#Crea el conector
+# Inicializa el conector de Cloud SQL
 connector = Connector()
 
-def getconn():
+# Función para obtener la conexión a la base de datos
+def getconn() -> pg8000.dbapi.Connection:
     conn = connector.connect(
-        "PROJECT_ID:REGION:INSTANCE_NAME",  # ← reemplázalo
+        os.environ["INSTANCE_CONNECTION_NAME"],  # Formato: "project:region:instance"
         "pg8000",
-        user="postgres",
-        password=os.environ["DB_PASSWORD"],  # ← viene desde tus credentials
-        db="DATABASE_NAME"                   # ← reemplázalo
+        user=os.environ["DB_USER"],          # ej: "postgres"
+        password=os.environ["DB_PASS"],
+        db=os.environ["DB_NAME"]
     )
     return conn
-
-# Crea el engine de SQLAlchemy
-engine = sqlalchemy.create_engine(
-    "postgresql+pg8000://",
-    creator=getconn,
-    pool_pre_ping=True
-)
-
-'''
 
 db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    
     app.config.from_object(Config)
-    '''
-    app.config['SQLALCHEMY_ENGINE'] = engine
-    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-        "creator": getconn
-    }
-    
+
+    # Crea el "engine" de SQLAlchemy para conectarse a Cloud SQL
+    engine = sqlalchemy.create_engine(
+        "postgresql+pg8000://",
+        creator=getconn,
+    )
+
+    # Configura la aplicación para usar el engine de Cloud SQL
     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql+pg8000://"
-    '''
+    app.config["SQLALCHEMY_ENGINE"] = engine
+    
     db.init_app(app)
 
     with app.app_context():
+        # Importa los modelos aquí para que se registren con SQLAlchemy
+        # from . import models
         db.create_all()
-        from app import routes  # Importa aquí para registrar las rutas
+        from app import routes
 
     return app
-
